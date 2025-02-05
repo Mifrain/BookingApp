@@ -4,6 +4,8 @@ from fastapi import Request, HTTPException, Depends, status
 from jose import jwt, JWTError
 
 from app.config import settings
+from app.exceptions import TokenExpiredException, TokenAbsentException, IncorrectTokenFormatException, \
+    Unauthorized401Exception
 from app.users.models import Users
 from app.users.services import UserService
 
@@ -12,7 +14,7 @@ from app.users.services import UserService
 def get_token(request: Request):
     token = request.cookies.get('booking_access_token')
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise TokenAbsentException
     return token
 
 # Проверка JWT
@@ -25,18 +27,18 @@ async def get_current_user(token: str = Depends(get_token)):
             token, settings.SECRET_KEY, settings.ALGORITHM
         )
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise IncorrectTokenFormatException
     # Дата окончания токена
     expire: str = payload.get('exp')
     if (not expire) or (int(expire) < datetime.utcnow().timestamp()):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise TokenExpiredException
     # Получения id
     user_id: str = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise Unauthorized401Exception
     # Получение пользователя
     user: Users = await UserService.find_by_id(int(user_id))
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise Unauthorized401Exception
 
     return user
