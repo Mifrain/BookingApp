@@ -29,3 +29,5 @@ async def authenticate_user(email: str, password: str):
     if not user and not verify_password(password, user.hashed_password):
         return None
     return user
+
+# TODO: add refresh_access_token
