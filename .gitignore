@@ -6,3 +6,5 @@
 .env
  
 app/migrations
+
+**/mock_*.json
