@@ -13,6 +13,8 @@ from app.hotels.models import Hotels
 from app.hotels.rooms.models import Rooms
 from app.users.models import Users
 
+from httpx import AsyncClient, ASGITransport
+
 
 @pytest.fixture(scope='session', autouse=True)
 async def prepare_database():
@@ -56,3 +58,9 @@ def event_loop(request):
     yield loop
     loop.close()
 
+
+@pytest.fixture(scope="function")
+async def ac():
+    from app.main import app as fastapi_app
+    async with AsyncClient(transport=ASGITransport(app=fastapi_app), base_url="http://test") as ac:
+        yield ac

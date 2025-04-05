@@ -31,3 +31,11 @@ async def add_booking(
     booking_dict = parse_obj_as(SBooking, booking).dict()
     send_booking_confirmation_email.delay(booking_dict, user.email)
     return booking
+
+
+@router.delete("/{booking_id}")
+async def remove_booking(
+    booking_id: int,
+    current_user: Users = Depends(get_current_user),
+):
+    await BookingService.delete(id=booking_id, user_id=current_user.id)
