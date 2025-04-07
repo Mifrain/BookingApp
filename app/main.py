@@ -3,6 +3,8 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
+import sentry_sdk
+
 
 from app.bookings.router import router as router_booking
 from app.config import settings
@@ -11,6 +13,11 @@ from app.users.router import router as router_users
 
 app = FastAPI()
 
+
+sentry_sdk.init(
+    dsn=settings.SENTRY,
+    send_default_pii=True,
+)
 
 app.include_router(router_users)
 app.include_router(router_booking)

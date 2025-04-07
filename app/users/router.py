@@ -6,6 +6,7 @@ from app.users.dependencies import get_current_user
 from app.users.models import Users
 from app.users.schemas import SUserAuth
 from app.users.services import UserService
+from app.logger import logger
 
 router = APIRouter(
     prefix='/auth',
@@ -19,6 +20,7 @@ async def register_user(user_data: SUserAuth):
     if existing_user:
         raise UserAlreadyExistsException
     hashed_password = get_password_hash(user_data.password)
+    logger.info("User registered")
     await UserService.add(email=user_data.email, hashed_password=hashed_password)
 
 @router.post('/login')
@@ -29,6 +31,7 @@ async def login_user(response: Response, user_data: SUserAuth):
 
     access_token = create_access_token({'sub': str(user.id)})
     response.set_cookie('booking_access_token', access_token, httponly=True)
+    logger.info(f"User {user_data.email} logged in")
     return access_token
 
 @router.post('/logout')
