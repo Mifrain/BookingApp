@@ -1,16 +1,13 @@
 from fastapi import FastAPI
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
 from starlette.middleware.cors import CORSMiddleware
 
 from app.bookings.router import router as router_booking
-from app.users.router import router as router_users
-from app.hotels.router import router as router_hotels
-
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-
-from redis import asyncio as aioredis
-
 from app.config import settings
+from app.hotels.router import router as router_hotels
+from app.users.router import router as router_users
 
 app = FastAPI()
 

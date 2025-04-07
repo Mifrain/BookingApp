@@ -14,7 +14,7 @@ class BookingService(BaseService):
     model = Bookings
 
     @classmethod
-    async def add(cls, user_id: int, room_id:int, date_from: date, date_to: date):
+    async def add(cls, user_id: int, room_id: int, date_from: date, date_to: date):
         rooms_left = await RoomService.rooms_left(room_id, date_from, date_to)
 
         async with async_session_maker() as session:
@@ -23,13 +23,17 @@ class BookingService(BaseService):
                 price = await session.execute(get_price)
                 price: int = price.scalar()
 
-                add_booking = insert(Bookings).values(
-                    room_id=room_id,
-                    user_id=user_id,
-                    date_from=date_from,
-                    date_to=date_to,
-                    price= price
-                ).returning(Bookings)
+                add_booking = (
+                    insert(Bookings)
+                    .values(
+                        room_id=room_id,
+                        user_id=user_id,
+                        date_from=date_from,
+                        date_to=date_to,
+                        price=price,
+                    )
+                    .returning(Bookings)
+                )
 
                 new_booking = await session.execute(add_booking)
                 await session.commit()
